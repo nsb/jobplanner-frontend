@@ -6,8 +6,6 @@
   "main": "dist/app.js",
   "scripts": {
     "start": "webpack-dev-server --hot --inline --content-base src/",
-    "build": "rimraf dist && webpack",
-    "watch": "webpack --watch",
     "build": "webpack",
     "watch": "webpack --watch",
     "dev": "webpack-dev-server --port 3000"
@@ -15,6 +13,7 @@
   "author": "Niels Sandholt Busch",
   "license": "ISC",
   "dependencies": {
+    "material-design-lite": "^1.2.1"
   },
   "devDependencies": {
     "css-loader": "^0.25.0",
