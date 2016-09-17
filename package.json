@@ -13,6 +13,7 @@
   "author": "Niels Sandholt Busch",
   "license": "ISC",
   "dependencies": {
+    "dialog-polyfill": "^0.4.4",
     "material-design-lite": "^1.2.1"
   },
   "devDependencies": {
