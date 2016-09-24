@@ -8,21 +8,33 @@ import Material.Layout as Layout
 import Material.Color exposing (Hue(..))
 import Material.Scheme as Scheme
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
+import Work.View
+import Work.Types
+import Work.State
 
 
 -- MODEL
 
 
+type Section
+    = Calendar
+    | Clients
+    | Work
+
+
 type alias Model =
     { mdl :
         Material.Model
+    , currentSection : Section
+    , workModel : Work.Types.Model
     }
 
 
 model : Model
 model =
-    { mdl =
-        Material.model
+    { mdl = Material.model
+    , currentSection = Work
+    , workModel = { jobItems = Nothing }
     }
 
 
@@ -32,7 +44,8 @@ model =
 
 type Msg
     = Mdl (Material.Msg Msg)
-
+    | ChangeSection Section
+    | WorkMessage Work.Types.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -40,6 +53,17 @@ update msg model =
     case msg of
         Mdl msg' ->
             Material.update msg' model
+
+        ChangeSection msg' ->
+            ( { model | currentSection = msg' }, Cmd.none )
+
+        WorkMessage msg' ->
+            let
+                ( subMdl, subCmd ) =
+                    Work.State.update msg' model.workModel
+            in
+                { model | workModel = subMdl }
+                    ! [ Cmd.map WorkMessage subCmd ]
 
 
 
@@ -52,22 +76,22 @@ type alias Mdl =
 
 drawer : List (Html Msg)
 drawer =
-  [ Layout.title [] [ text "JobPlanner" ]
-  , Layout.navigation
-    []
-    [  Layout.link
-        [ Layout.href "/calendar" ]
-        [ text "Calendar" ]
-    , Layout.link
-        [ Layout.href "/clients" ]
-        [ text "Clients" ]
-    , Layout.link
-        [ Layout.href "/work"
-        , Layout.onClick (Layout.toggleDrawer Mdl)
+    [ Layout.title [] [ text "JobPlanner" ]
+    , Layout.navigation
+        []
+        [ Layout.link
+            [ Layout.href "/calendar" ]
+            [ text "Calendar" ]
+        , Layout.link
+            [ Layout.href "/clients" ]
+            [ text "Clients" ]
+        , Layout.link
+            [ Layout.href "#work"
+            , Layout.onClick (Layout.toggleDrawer Mdl)
+            ]
+            [ text "Work" ]
         ]
-        [ text "Work" ]
     ]
-  ]
 
 
 header : Html Msg
@@ -82,14 +106,13 @@ header =
         ]
 
 
-content : (Html a)
-content =
-  grid []
-    [ cell [ size Tablet 8, size Desktop 12, size Phone 4 ]
-        [ h4 [] [text "Cell 4"]
-        , p [] [text "Size varies with device"]
+content : Model -> Html a
+content model =
+    grid []
+        [ cell [ size Tablet 8, size Desktop 12, size Phone 4 ]
+            [ Work.View.render
+            ]
         ]
-    ]
 
 
 view : Model -> Html Msg
@@ -107,7 +130,7 @@ view model =
             , drawer = drawer
             , tabs = ( [], [] )
             , main =
-                [ content
+                [ content model
                 ]
             }
         ]
