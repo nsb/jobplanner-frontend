@@ -8,9 +8,7 @@ import Material.Layout as Layout
 import Material.Color exposing (Hue(..))
 import Material.Scheme as Scheme
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
-import Work.View
-import Work.Types
-import Work.State
+import Work
 
 
 -- MODEL
@@ -26,16 +24,21 @@ type alias Model =
     { mdl :
         Material.Model
     , currentSection : Section
-    , workModel : Work.Types.Model
+    , workModel : Work.Model
     }
 
 
-model : Model
-model =
+initialModel : Model
+initialModel =
     { mdl = Material.model
     , currentSection = Work
-    , workModel = { jobItems = Nothing }
+    , workModel = Work.initialModel
     }
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( initialModel, Cmd.none )
 
 
 
@@ -45,7 +48,7 @@ model =
 type Msg
     = Mdl (Material.Msg Msg)
     | ChangeSection Section
-    | WorkMessage Work.Types.Msg
+    | WorkMessage Work.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -60,10 +63,9 @@ update msg model =
         WorkMessage msg' ->
             let
                 ( subMdl, subCmd ) =
-                    Work.State.update msg' model.workModel
+                    Work.update msg' model.workModel
             in
-                { model | workModel = subMdl }
-                    ! [ Cmd.map WorkMessage subCmd ]
+                ( { model | workModel = subMdl }, Cmd.map WorkMessage subCmd )
 
 
 
@@ -106,11 +108,13 @@ header =
         ]
 
 
-content : Model -> Html a
+content : Model -> Html Msg
 content model =
     grid []
         [ cell [ size Tablet 8, size Desktop 12, size Phone 4 ]
-            [ Work.View.render
+            [ div []
+                [ App.map WorkMessage (Work.view model.workModel)
+                ]
             ]
         ]
 
@@ -137,10 +141,14 @@ view model =
         |> Scheme.topWithScheme Material.Color.Blue Material.Color.Green
 
 
+
+-- Cmd.map WorkMessage Work.loadJobs
+
+
 main : Program Never
 main =
     App.program
-        { init = ( model, Cmd.none )
+        { init = ( initialModel, Cmd.map WorkMessage Work.loadJobs )
         , view = view
         , subscriptions = always Sub.none
         , update = update
