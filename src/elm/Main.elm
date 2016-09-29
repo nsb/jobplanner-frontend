@@ -9,6 +9,7 @@ import Material.Color exposing (Hue(..))
 import Material.Scheme as Scheme
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Work
+import Login
 
 
 -- MODEL
@@ -25,6 +26,7 @@ type alias Model =
         Material.Model
     , currentSection : Section
     , workModel : Work.Model
+    , loginModel : Login.Model
     }
 
 
@@ -33,6 +35,7 @@ initialModel =
     { mdl = Material.model
     , currentSection = Work
     , workModel = Work.initialModel
+    , loginModel = Login.initialModel
     }
 
 
@@ -49,6 +52,7 @@ type Msg
     = Mdl (Material.Msg Msg)
     | ChangeSection Section
     | WorkMessage Work.Msg
+    | LoginMessage Login.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -66,6 +70,13 @@ update msg model =
                     Work.update msg' model.workModel
             in
                 ( { model | workModel = subMdl }, Cmd.map WorkMessage subCmd )
+
+        LoginMessage msg' ->
+            let
+                ( subMdl, subCmd ) =
+                    Login.update msg' model.loginModel
+            in
+                ( { model | loginModel = subMdl }, Cmd.map LoginMessage subCmd )
 
 
 
@@ -113,8 +124,9 @@ content model =
     grid []
         [ cell [ size Tablet 8, size Desktop 12, size Phone 4 ]
             [ div []
-                [ App.map WorkMessage (Work.view model.workModel)
-                ]
+                -- [ App.map WorkMessage (Work.view model.workModel)
+                -- ]
+                [ App.map LoginMessage (Login.view model.loginModel) ]
             ]
         ]
 
