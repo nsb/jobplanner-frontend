@@ -65,11 +65,16 @@ update msg model =
             ( { model | currentSection = msg' }, Cmd.none )
 
         WorkMessage msg' ->
-            let
-                ( subMdl, subCmd ) =
-                    Work.update msg' model.workModel
-            in
-                ( { model | workModel = subMdl }, Cmd.map WorkMessage subCmd )
+            case model.loginModel.token of
+                Just token ->
+                    let
+                        ( subMdl, subCmd ) =
+                            Work.update msg' model.workModel token
+                    in
+                        ( { model | workModel = subMdl }, Cmd.map WorkMessage subCmd )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         LoginMessage msg' ->
             let
@@ -160,7 +165,7 @@ view model =
 main : Program Never
 main =
     App.program
-        { init = ( initialModel, Cmd.map WorkMessage Work.loadJobs )
+        { init = ( initialModel, Cmd.map WorkMessage (Work.loadJobs "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NzUzMjY1NzEsInVzZXJuYW1lIjoibmllbHMiLCJlbWFpbCI6IiIsInVzZXJfaWQiOjN9.B6TZYj5KehMJVtnao1Ni1QdUzd6zxqgGsyVJd9vZwRI") )
         , view = view
         , subscriptions = always Sub.none
         , update = update

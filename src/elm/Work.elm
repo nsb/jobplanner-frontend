@@ -1,10 +1,10 @@
 module Work exposing (..)
 
-import Http
 import Json.Decode as JsonD exposing ((:=))
 import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Jwt
 
 
 type alias JobItem =
@@ -42,23 +42,23 @@ decodeJobItem =
         ("description" := JsonD.string)
 
 
-loadJobs : Cmd Msg
-loadJobs =
-    Http.get decodeJobItems "http://localhost:8000/jobs/"
+loadJobs : String -> Cmd Msg
+loadJobs token =
+    Jwt.get token decodeJobItems "http://localhost:8000/jobs/"
         |> Task.mapError toString
         |> Task.perform FetchFail FetchSucceed
 
 
-init : ( Model, Cmd Msg )
-init =
-    (initialModel ! [ loadJobs ])
+init : String -> ( Model, Cmd Msg )
+init token =
+    (initialModel ! [ loadJobs token ])
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> String -> ( Model, Cmd Msg )
+update msg model token =
     case msg of
         FetchData ->
-            ( model, loadJobs )
+            ( model, loadJobs token )
 
         FetchSucceed jobs ->
             ( { model | jobItems = jobs }, Cmd.none )
