@@ -15,6 +15,11 @@ import Login
 -- MODEL
 
 
+type alias ProgramFlags =
+    { apiKey : Maybe String
+    }
+
+
 type Section
     = Calendar
     | Clients
@@ -39,12 +44,18 @@ initialModel =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( initialModel, Cmd.none )
+init : ProgramFlags -> ( Model, Cmd Msg )
+init flags =
+    case flags.apiKey of
+        Just apiKey ->
+            ( initialModel, Cmd.map WorkMessage (Work.loadJobs apiKey) )
+
+        Nothing ->
+            ( initialModel, Cmd.none )
 
 
 
+-- ( initialModel, Cmd.none )
 -- ACTION, UPDATE
 
 
@@ -162,10 +173,10 @@ view model =
 -- Cmd.map WorkMessage Work.loadJobs
 
 
-main : Program Never
+main : Program ProgramFlags
 main =
-    App.program
-        { init = ( initialModel, Cmd.map WorkMessage (Work.loadJobs "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE0NzUzMjY1NzEsInVzZXJuYW1lIjoibmllbHMiLCJlbWFpbCI6IiIsInVzZXJfaWQiOjN9.B6TZYj5KehMJVtnao1Ni1QdUzd6zxqgGsyVJd9vZwRI") )
+    App.programWithFlags
+        { init = init
         , view = view
         , subscriptions = always Sub.none
         , update = update

@@ -10,5 +10,11 @@ if ('serviceWorker' in navigator) {
 }
 
 var Elm = require('../elm/Main.elm');
-var mountNode = document.getElementById('main');
-var app = Elm.Main.embed(mountNode);
+var apiKey = localStorage.getItem('apiKey');
+var app;
+
+app = Elm.Main.fullscreen({apiKey: apiKey});
+
+app.ports.storeApiKey.subscribe(function(data){
+  localStorage.setItem('apiKey', data);
+});

@@ -9,6 +9,7 @@ import Task exposing (toResult)
 import Jwt exposing (..)
 import Decoders exposing (..)
 import Http exposing (empty)
+import Ports
 
 
 -- MODEL
@@ -100,7 +101,7 @@ update msg model =
             )
 
         LoginSuccess token ->
-            ( { model | token = Just token, msg = "" }, Cmd.none )
+            ( { model | token = Just token, msg = "" }, Ports.storeApiKey token )
 
         LoginFail err ->
             ( { model | msg = toString err }, Cmd.none )
