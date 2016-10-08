@@ -7,8 +7,13 @@ import Html.Attributes exposing (..)
 import Jwt
 
 
+type alias JobItemId =
+    Int
+
+
 type alias JobItem =
-    { customer : String
+    { id : JobItemId
+    , customer : String
     , recurrences : String
     , description : String
     }
@@ -36,7 +41,8 @@ decodeJobItems =
 
 decodeJobItem : JsonD.Decoder JobItem
 decodeJobItem =
-    JsonD.object3 JobItem
+    JsonD.object4 JobItem
+        ("id" := JsonD.int)
         ("customer" := JsonD.string)
         ("recurrences" := JsonD.string)
         ("description" := JsonD.string)

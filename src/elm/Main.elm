@@ -10,6 +10,8 @@ import Material.Scheme as Scheme
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Work
 import Login
+import Routing exposing (Route)
+import Navigation
 
 
 -- MODEL
@@ -32,29 +34,42 @@ type alias Model =
     , currentSection : Section
     , workModel : Work.Model
     , loginModel : Login.Model
+    , route : Routing.Route
     }
 
 
-initialModel : Model
-initialModel =
+initialModel : Routing.Route -> Model
+initialModel route =
     { mdl = Material.model
     , currentSection = Work
     , workModel = Work.initialModel
     , loginModel = Login.initialModel
+    , route = route
     }
 
 
-init : ProgramFlags -> ( Model, Cmd Msg )
-init flags =
-    case flags.apiKey of
-        Just apiKey ->
-            ( initialModel, Cmd.map WorkMessage (Work.loadJobs apiKey) )
+init : ProgramFlags -> Result String Route -> ( Model, Cmd Msg )
+init flags result =
+    let
+        currentRoute =
+            Routing.routeFromResult result
+    in
+        case flags.apiKey of
+            Just apiKey ->
+                ( initialModel currentRoute, Cmd.map WorkMessage (Work.loadJobs apiKey) )
 
-        Nothing ->
-            ( initialModel, Cmd.none )
+            Nothing ->
+                ( initialModel currentRoute, Cmd.none )
 
 
 
+-- init : Result String Route -> ( Model, Cmd Msg )
+-- init result =
+--     let
+--         currentRoute =
+--             Routing.routeFromResult result
+--     in
+--         ( initialModel currentRoute, Cmd.map PlayersMsg fetchAll )
 -- ( initialModel, Cmd.none )
 -- ACTION, UPDATE
 
@@ -169,15 +184,21 @@ view model =
         |> Scheme.topWithScheme Material.Color.Blue Material.Color.Green
 
 
-
--- Cmd.map WorkMessage Work.loadJobs
+urlUpdate : Result String Route -> Model -> ( Model, Cmd Msg )
+urlUpdate result model =
+    let
+        currentRoute =
+            Routing.routeFromResult result
+    in
+        ( { model | route = currentRoute }, Cmd.none )
 
 
 main : Program ProgramFlags
 main =
-    App.programWithFlags
+    Navigation.programWithFlags Routing.parser
         { init = init
         , view = view
         , subscriptions = always Sub.none
         , update = update
+        , urlUpdate = urlUpdate
         }
