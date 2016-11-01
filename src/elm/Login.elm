@@ -28,14 +28,14 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    Model "niels" "testpassword" Nothing ""
+initialModel : Maybe String -> Model
+initialModel token =
+    Model "niels" "testpassword" token ""
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Cmd.none )
+    ( initialModel Nothing, Cmd.none )
 
 
 

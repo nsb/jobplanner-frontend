@@ -10,7 +10,7 @@ import Material.Scheme as Scheme
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Work
 import Login
-import Routing exposing (Route)
+import Routing exposing (Route(..))
 import Navigation
 
 
@@ -38,12 +38,12 @@ type alias Model =
     }
 
 
-initialModel : Routing.Route -> Model
-initialModel route =
+initialModel : Routing.Route -> Maybe String -> Model
+initialModel route token =
     { mdl = Material.model
     , currentSection = Work
     , workModel = Work.initialModel
-    , loginModel = Login.initialModel
+    , loginModel = Login.initialModel token
     , route = route
     }
 
@@ -56,10 +56,15 @@ init flags result =
     in
         case flags.apiKey of
             Just apiKey ->
-                ( initialModel currentRoute, Cmd.map WorkMessage (Work.loadJobs apiKey) )
+                doSomeThing (initialModel currentRoute (Just apiKey))
 
             Nothing ->
-                ( initialModel currentRoute, Cmd.none )
+                ( initialModel currentRoute Nothing, Cmd.none )
+
+
+doSomeThing : Model -> ( Model, Cmd Msg )
+doSomeThing model =
+    ( model, Cmd.none )
 
 
 
@@ -162,6 +167,22 @@ content model =
         ]
 
 
+page : Model -> Html Msg
+page model =
+    case model.route of
+        JobsRoute ->
+            App.map WorkMessage (Work.view model.workModel)
+
+        JobRoute id ->
+            content model
+
+        Login ->
+            content model
+
+        NotFoundRoute ->
+            text "Hejsa"
+
+
 view : Model -> Html Msg
 view model =
     div []
@@ -177,7 +198,7 @@ view model =
             , drawer = drawer
             , tabs = ( [], [] )
             , main =
-                [ content model
+                [ page model
                 ]
             }
         ]
@@ -190,7 +211,7 @@ urlUpdate result model =
         currentRoute =
             Routing.routeFromResult result
     in
-        ( { model | route = currentRoute }, Cmd.none )
+        doSomeThing { model | route = currentRoute }
 
 
 main : Program ProgramFlags

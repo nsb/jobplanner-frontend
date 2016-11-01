@@ -9,14 +9,16 @@ import Work exposing (JobItemId)
 type Route
     = JobsRoute
     | JobRoute JobItemId
+    | Login
     | NotFoundRoute
 
 
 matchers : Parser (Route -> a) a
 matchers =
     oneOf
-        [ format JobsRoute (s "")
+        [ format JobsRoute (s "jobs")
         , format JobRoute (s "jobs" </> int)
+        , format Login (s "login")
         ]
 
 

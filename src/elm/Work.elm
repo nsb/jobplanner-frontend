@@ -5,6 +5,8 @@ import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Jwt
+import Material.List as Lists
+import Debug
 
 
 type alias JobItemId =
@@ -78,7 +80,7 @@ subscriptions _ =
     Sub.none
 
 
-loading : Html msg
+loading : Html Msg
 loading =
     div [ class "loading" ]
         [ img
@@ -89,9 +91,18 @@ loading =
         ]
 
 
+jobItemRow : JobItem -> Html Msg
+jobItemRow jobItem =
+    Lists.li
+        []
+        [ Lists.content [] [ text "Elm" ] ]
+
+
 view : Model -> Html Msg
 view model =
-    div []
-        [ h4 [] [ text "Cell 4" ]
-        , p [] [ text "Size varies with device" ]
+    -- Debug.log "Hejsa"
+    div
+        []
+        [ h4 [] [ text "Work" ]
+        , Lists.ul [] (List.map jobItemRow model.jobItems)
         ]
