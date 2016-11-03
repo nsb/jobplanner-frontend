@@ -38,13 +38,13 @@ type alias Model =
     }
 
 
-initialModel : Routing.Route -> Model
-initialModel route =
+initialModel : Model
+initialModel =
     { mdl = Material.model
     , currentSection = Work
     , workModel = Work.initialModel
     , loginModel = Login.initialModel
-    , route = route
+    , route = Routing.JobsRoute
     }
 
 
@@ -53,13 +53,19 @@ init flags result =
     let
         currentRoute =
             Routing.routeFromResult result
+
+        updatedModel =
+            { initialModel
+                | route = currentRoute
+                , loginModel = Login.updateModelWithToken flags.apiKey
+            }
     in
-        case flags.apiKey of
+        case updatedModel.loginModel.token of
             Just apiKey ->
-                ( initialModel currentRoute, Cmd.map WorkMessage (Work.loadJobs apiKey) )
+                ( updatedModel, Cmd.map WorkMessage (Work.loadJobs apiKey) )
 
             Nothing ->
-                ( initialModel currentRoute, Cmd.none )
+                ( updatedModel, Cmd.none )
 
 
 

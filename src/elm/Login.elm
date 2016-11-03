@@ -1,4 +1,4 @@
-module Login exposing (init, update, view, Model, initialModel, Msg)
+module Login exposing (init, updateModelWithToken, update, view, Model, initialModel, Msg)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -31,6 +31,11 @@ type alias Model =
 initialModel : Model
 initialModel =
     Model "niels" "testpassword" Nothing ""
+
+
+updateModelWithToken : Maybe String -> Model
+updateModelWithToken token =
+    { initialModel | token = token }
 
 
 init : ( Model, Cmd Msg )
