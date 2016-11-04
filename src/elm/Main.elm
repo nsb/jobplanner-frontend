@@ -128,7 +128,7 @@ page : Model -> Html Msg
 page model =
     case model.route of
         JobsRoute ->
-            App.map WorkMessage (Work.view model.workModel)
+            App.map WorkMessage (Work.view model.workModel model.mdl)
 
         JobRoute id ->
             content model

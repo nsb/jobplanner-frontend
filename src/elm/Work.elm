@@ -5,6 +5,9 @@ import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Jwt
+import Material
+import Material.Button as Button exposing (..)
+import Material.Icon as Icon
 import Debug
 
 
@@ -21,18 +24,24 @@ type alias JobItem =
 
 
 type alias Model =
-    { jobItems : List JobItem }
+    { jobItems : List JobItem
+    , mdl : Material.Model
+    }
 
 
 initialModel : Model
 initialModel =
-    { jobItems = [] }
+    { jobItems = []
+    , mdl = Material.model
+    }
 
 
 type Msg
     = FetchData
     | FetchSucceed (List JobItem)
     | FetchFail String
+    | Mdl (Material.Msg Msg)
+    | Click
 
 
 decodeJobItems : JsonD.Decoder (List JobItem)
@@ -65,8 +74,7 @@ update : Msg -> Model -> String -> ( Model, Cmd Msg )
 update msg model token =
     case msg of
         FetchData ->
-            Debug.log "FetchData"
-                ( model, loadJobs token )
+            ( model, loadJobs token )
 
         FetchSucceed jobs ->
             ( { model | jobItems = jobs }, Cmd.none )
@@ -74,10 +82,20 @@ update msg model token =
         FetchFail error ->
             ( model, Cmd.none )
 
+        Mdl msg' ->
+            Material.update msg' model
+
+        Click ->
+            ( model, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.none
+
+
+type alias Mdl =
+    Material.Model
 
 
 loading : Html msg
@@ -114,9 +132,18 @@ jobRow job =
         ]
 
 
-view : Model -> Html Msg
-view model =
+view : Model -> Material.Model -> Html Msg
+view model mdl =
     div []
         [ h4 [] [ text "Cell 4" ]
         , p [] [ list model.jobItems ]
+        , Button.render Mdl
+            [ 0 ]
+            mdl
+            [ Button.fab
+            , Button.colored
+            , Button.ripple
+            , Button.onClick Click
+            ]
+            [ Icon.i "add" ]
         ]
