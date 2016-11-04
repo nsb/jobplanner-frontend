@@ -8,6 +8,7 @@ import Jwt
 import Material
 import Material.Button as Button exposing (..)
 import Material.Icon as Icon
+import Material.Spinner as Loading
 import Debug
 
 
@@ -25,6 +26,7 @@ type alias JobItem =
 
 type alias Model =
     { jobItems : List JobItem
+    , loading : Bool
     , mdl : Material.Model
     }
 
@@ -33,6 +35,7 @@ initialModel : Model
 initialModel =
     { jobItems = []
     , mdl = Material.model
+    , loading = False
     }
 
 
@@ -74,13 +77,13 @@ update : Msg -> Model -> String -> ( Model, Cmd Msg )
 update msg model token =
     case msg of
         FetchData ->
-            ( model, loadJobs token )
+            ( { model | loading = True }, loadJobs token )
 
         FetchSucceed jobs ->
-            ( { model | jobItems = jobs }, Cmd.none )
+            ( { model | jobItems = jobs, loading = False }, Cmd.none )
 
         FetchFail error ->
-            ( model, Cmd.none )
+            ( { model | loading = False }, Cmd.none )
 
         Mdl msg' ->
             Material.update msg' model
@@ -101,11 +104,8 @@ type alias Mdl =
 loading : Html msg
 loading =
     div [ class "loading" ]
-        [ img
-            [ src "loading_wheel.gif"
-            , class "loading"
-            ]
-            []
+        [ Loading.spinner
+            [ Loading.active True ]
         ]
 
 
@@ -135,8 +135,15 @@ jobRow job =
 view : Model -> Material.Model -> Html Msg
 view model mdl =
     div []
-        [ h4 [] [ text "Cell 4" ]
-        , p [] [ list model.jobItems ]
+        [ h4 [] [ text "Jobs" ]
+        , p []
+            [ case model.loading of
+                True ->
+                    loading
+
+                False ->
+                    list model.jobItems
+            ]
         , Button.render Mdl
             [ 0 ]
             mdl
