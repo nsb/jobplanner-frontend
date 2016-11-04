@@ -10,7 +10,7 @@ import Material.Scheme as Scheme
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Work
 import Login
-import Routing exposing (Route)
+import Routing exposing (Route(..))
 import Navigation
 
 
@@ -124,6 +124,22 @@ type alias Mdl =
     Material.Model
 
 
+page : Model -> Html Msg
+page model =
+    case model.route of
+        JobsRoute ->
+            App.map WorkMessage (Work.view model.workModel)
+
+        JobRoute id ->
+            content model
+
+        Login ->
+            content model
+
+        NotFoundRoute ->
+            text "Hejsa"
+
+
 drawer : List (Html Msg)
 drawer =
     [ Layout.title [] [ text "JobPlanner" ]
@@ -183,7 +199,7 @@ view model =
             , drawer = drawer
             , tabs = ( [], [] )
             , main =
-                [ content model
+                [ page model
                 ]
             }
         ]

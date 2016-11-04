@@ -9,6 +9,7 @@ import Work exposing (JobItemId)
 type Route
     = JobsRoute
     | JobRoute JobItemId
+    | Login
     | NotFoundRoute
 
 
@@ -17,6 +18,7 @@ matchers =
     oneOf
         [ format JobsRoute (s "")
         , format JobRoute (s "jobs" </> int)
+        , format Login (s "login")
         ]
 
 

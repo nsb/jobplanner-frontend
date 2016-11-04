@@ -5,6 +5,7 @@ import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Jwt
+import Debug
 
 
 type alias JobItemId =
@@ -13,7 +14,7 @@ type alias JobItemId =
 
 type alias JobItem =
     { id : JobItemId
-    , customer : String
+    , customer : Int
     , recurrences : String
     , description : String
     }
@@ -43,7 +44,7 @@ decodeJobItem : JsonD.Decoder JobItem
 decodeJobItem =
     JsonD.object4 JobItem
         ("id" := JsonD.int)
-        ("customer" := JsonD.string)
+        ("customer" := JsonD.int)
         ("recurrences" := JsonD.string)
         ("description" := JsonD.string)
 
@@ -64,7 +65,8 @@ update : Msg -> Model -> String -> ( Model, Cmd Msg )
 update msg model token =
     case msg of
         FetchData ->
-            ( model, loadJobs token )
+            Debug.log "FetchData"
+                ( model, loadJobs token )
 
         FetchSucceed jobs ->
             ( { model | jobItems = jobs }, Cmd.none )
@@ -89,9 +91,32 @@ loading =
         ]
 
 
+list : List JobItem -> Html Msg
+list jobs =
+    div [ class "p2" ]
+        [ table []
+            [ thead []
+                [ tr []
+                    [ th [] [ text "Id" ]
+                    , th [] [ text "Description" ]
+                    ]
+                ]
+            , tbody [] (List.map jobRow jobs)
+            ]
+        ]
+
+
+jobRow : JobItem -> Html Msg
+jobRow job =
+    tr []
+        [ td [] [ text (toString job.id) ]
+        , td [] [ text job.description ]
+        ]
+
+
 view : Model -> Html Msg
 view model =
     div []
         [ h4 [] [ text "Cell 4" ]
-        , p [] [ text "Size varies with device" ]
+        , p [] [ list model.jobItems ]
         ]
