@@ -131,13 +131,13 @@ page model =
             App.map WorkMessage (Work.view model.workModel model.mdl)
 
         JobRoute id ->
-            content model
+            text "JobRoute"
 
         Login ->
-            content model
+            App.map LoginMessage (Login.view model.loginModel)
 
         NotFoundRoute ->
-            text "Hejsa"
+            text "NotFoundRoute"
 
 
 drawer : List (Html Msg)
@@ -179,7 +179,8 @@ content model =
             [ div []
                 -- [ App.map WorkMessage (Work.view model.workModel)
                 -- ]
-                [ App.map LoginMessage (Login.view model.loginModel) ]
+                [ page model ]
+              -- [ App.map LoginMessage (Login.view model.loginModel) ]
             ]
         ]
 
@@ -199,7 +200,7 @@ view model =
             , drawer = drawer
             , tabs = ( [], [] )
             , main =
-                [ page model
+                [ content model
                 ]
             }
         ]

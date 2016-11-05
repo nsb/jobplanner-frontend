@@ -116,6 +116,8 @@ list jobs =
             [ thead []
                 [ tr []
                     [ th [] [ text "Id" ]
+                    , th [] [ text "Customer" ]
+                    , th [] [ text "Recurrence" ]
                     , th [] [ text "Description" ]
                     ]
                 ]
@@ -128,6 +130,8 @@ jobRow : JobItem -> Html Msg
 jobRow job =
     tr []
         [ td [] [ text (toString job.id) ]
+        , td [] [ text (toString job.customer) ]
+        , td [] [ text job.recurrences ]
         , td [] [ text job.description ]
         ]
 
