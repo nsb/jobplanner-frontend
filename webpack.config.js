@@ -22,7 +22,11 @@ var commonConfig = {
 
   resolve: {
     modulesDirectories: ['node_modules'],
-    extensions:         ['', '.js', '.elm']
+    extensions: ['', '.js', '.elm'],
+    alias: {
+      "rrulelib": "rrule/lib/rrule.js",
+      "nlp": "rrule/lib/nlp.js"
+    }
   },
 
   module: {
