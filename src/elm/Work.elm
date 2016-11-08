@@ -10,6 +10,7 @@ import Material.Button as Button exposing (..)
 import Material.Icon as Icon
 import Material.Spinner as Loading
 import Ports
+import Debug
 
 
 type alias JobItemId =
@@ -45,6 +46,7 @@ type Msg
     | FetchFail String
     | Mdl (Material.Msg Msg)
     | Click
+    | RRuleText String
 
 
 decodeJobItems : JsonD.Decoder (List JobItem)
@@ -80,7 +82,7 @@ update msg model token =
             ( { model | loading = True }, loadJobs token )
 
         FetchSucceed jobs ->
-            ( { model | jobItems = jobs, loading = False }, Cmd.none )
+            ( { model | jobItems = jobs, loading = False }, Ports.rruleToText "hejsa" )
 
         FetchFail error ->
             ( { model | loading = False }, Cmd.none )
@@ -91,10 +93,14 @@ update msg model token =
         Click ->
             ( model, Cmd.none )
 
+        RRuleText rule ->
+            Debug.log rule
+                ( model, Cmd.none )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.none
+    Sub.batch [ Ports.rruleText RRuleText ]
 
 
 type alias Mdl =

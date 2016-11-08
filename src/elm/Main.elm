@@ -12,6 +12,7 @@ import Work
 import Login
 import Routing exposing (Route(..))
 import Navigation
+import Ports
 
 
 -- MODEL
@@ -69,14 +70,6 @@ init flags result =
 
 
 
--- init : Result String Route -> ( Model, Cmd Msg )
--- init result =
---     let
---         currentRoute =
---             Routing.routeFromResult result
---     in
---         ( initialModel currentRoute, Cmd.map PlayersMsg fetchAll )
--- ( initialModel, Cmd.none )
 -- ACTION, UPDATE
 
 
@@ -216,12 +209,17 @@ urlUpdate result model =
         ( { model | route = currentRoute }, Cmd.none )
 
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch [ Sub.map WorkMessage (Work.subscriptions model.workModel) ]
+
+
 main : Program ProgramFlags
 main =
     Navigation.programWithFlags Routing.parser
         { init = init
         , view = view
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         , update = update
         , urlUpdate = urlUpdate
         }
