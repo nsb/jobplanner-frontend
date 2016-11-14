@@ -12,7 +12,6 @@ import Work
 import Login
 import Routing exposing (Route(..))
 import Navigation
-import Ports
 
 
 -- MODEL

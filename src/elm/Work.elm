@@ -11,10 +11,38 @@ import Material.Icon as Icon
 import Material.Spinner as Loading
 import Ports
 import Debug
+import Date exposing (Date)
 
 
 type alias JobItemId =
     Int
+
+
+type Repeat
+    = Daily
+    | Weekly
+    | Monthly
+    | Yearly
+
+
+type RepeatBy
+    = Week
+    | Month
+
+
+type RecurrenceEnds
+    = Never
+    | Occurrences Int
+    | OnDate Date
+
+
+type alias Reccurence =
+    { repeat : Repeat
+    , every : Int
+    , by : RepeatBy
+    , begins : Date
+    , ends : RecurrenceEnds
+    }
 
 
 type alias JobItem =
@@ -82,7 +110,7 @@ update msg model token =
             ( { model | loading = True }, loadJobs token )
 
         FetchSucceed jobs ->
-            ( { model | jobItems = jobs, loading = False }, Ports.rruleToText "hejsa" )
+            ( { model | jobItems = jobs, loading = False }, Ports.rruleToText "RRULE:FREQ=WEEKLY;BYDAY=TU RRULE:FREQ=MONTHLY;BYDAY=1MO" )
 
         FetchFail error ->
             ( { model | loading = False }, Cmd.none )

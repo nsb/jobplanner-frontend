@@ -25,11 +25,10 @@ app.ports.storeApiKey.subscribe(function(data){
   localStorage.setItem('apiKey', data);
 });
 
-app.ports.rruleToText.subscribe(function(){
-  var rule = new RRule({
-    freq: RRule.WEEKLY,
-    count: 23
-  })
-  var msg = rule.toText()
+app.ports.rruleToText.subscribe(function(rrule){
+  var rules = rrulestr(rrule, {forceset: true});
+  console.log(rules.all());
+  // rules.all().map(function(rule) { console.log(rule.toText())})
+  var msg = "hejsa"
   app.ports.rruleText.send(msg);
 });
