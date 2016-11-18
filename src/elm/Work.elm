@@ -10,7 +10,6 @@ import Material.Button as Button exposing (..)
 import Material.Icon as Icon
 import Material.Spinner as Loading
 import Ports
-import Debug
 import Date exposing (Date)
 import String
 
@@ -106,6 +105,7 @@ init token =
     (initialModel ! [ loadJobs token ])
 
 
+getRRuleText : List JobItem -> Cmd Msg
 getRRuleText jobItems =
     Cmd.batch (List.map (\j -> Ports.rruleToText j.recurrences) jobItems)
 
@@ -129,7 +129,6 @@ update msg model token =
             ( model, Cmd.none )
 
         RRuleText rules ->
-            -- Debug.log (String.concat rule)
             let
                 updateJobItem jobItem =
                     { jobItem | recurrencesText = rules }
