@@ -27,8 +27,10 @@ app.ports.storeApiKey.subscribe(function(data){
 
 app.ports.rruleToText.subscribe(function(rrule){
   var rules = rrulestr(rrule, {forceset: true});
-  console.log(rules.all());
-  // rules.all().map(function(rule) { console.log(rule.toText())})
-  var msg = "hejsa"
-  app.ports.rruleText.send(msg);
+  // console.log(rules.all());
+  // var rule = rrulestr(rrule);
+  var text = rules._rrule.map(function(rule) { return rule.toText()})
+  // var msg = "hejsa"
+  // debugger;
+  app.ports.rruleText.send(text);
 });
