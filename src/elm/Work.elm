@@ -1,6 +1,6 @@
 module Work exposing (..)
 
-import Json.Decode as JsonD exposing ((:=))
+import Json.Decode as JsonD exposing (field)
 import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -85,12 +85,12 @@ decodeJobItems =
 
 decodeJobItem : JsonD.Decoder JobItem
 decodeJobItem =
-    JsonD.object5 JobItem
-        ("id" := JsonD.int)
-        ("customer" := JsonD.int)
-        ("recurrences" := JsonD.string)
+    JsonD.map5 JobItem
+        (field "id" JsonD.int)
+        (field "customer" JsonD.int)
+        (field "recurrences" JsonD.string)
         (JsonD.succeed [])
-        ("description" := JsonD.string)
+        (field "description" JsonD.string)
 
 
 loadJobs : String -> Cmd Msg

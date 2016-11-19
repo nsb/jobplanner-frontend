@@ -1,6 +1,5 @@
 module Main exposing (..)
 
-import Html.App as App
 import Html exposing (..)
 import Html.Attributes exposing (href, class, style)
 import Material

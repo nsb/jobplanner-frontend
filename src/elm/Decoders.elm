@@ -1,6 +1,6 @@
 module Decoders exposing (..)
 
-import Json.Decode as Json exposing ((:=), Value)
+import Json.Decode as Json exposing (field, Value)
 
 
 type alias JwtToken =
@@ -12,11 +12,11 @@ type alias JwtToken =
 
 
 tokenStringDecoder =
-    ("token" := Json.string)
+    (field "token" Json.string)
 
 
 dataDecoder =
-    ("token" := Json.string)
+    (field "token" Json.string)
 
 
 tokenDecoder =
@@ -35,11 +35,11 @@ tokenDecoder =
 
 
 djangoDecoder =
-    Json.object4 JwtToken
-        ("user_id" := Json.int)
-        ("username" := Json.string)
-        ("email" := Json.string)
-        ("exp" := Json.int)
+    Json.map4 JwtToken
+        (field "user_id" Json.int)
+        (field "username" Json.string)
+        (field "email" Json.string)
+        (field "exp" Json.int)
 
 
 
