@@ -133,7 +133,9 @@ update msg model token =
                 updateJobItem jobItem =
                     { jobItem | recurrencesText = rules }
             in
-                ( { model | jobItems = List.map updateJobItem model.jobItems }, Cmd.none )
+                ( { model | jobItems = List.map updateJobItem model.jobItems }
+                , Cmd.none
+                )
 
 
 subscriptions : Model -> Sub Msg
