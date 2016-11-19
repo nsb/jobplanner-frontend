@@ -10,8 +10,8 @@ import Material.Button as Button exposing (..)
 import Material.Icon as Icon
 import Material.Spinner as Loading
 import Ports
-import Debug
 import Date exposing (Date)
+import String
 
 
 type alias JobItemId =
@@ -49,6 +49,7 @@ type alias JobItem =
     { id : JobItemId
     , customer : Int
     , recurrences : String
+    , recurrencesText : List String
     , description : String
     }
 
@@ -74,7 +75,7 @@ type Msg
     | FetchFail String
     | Mdl (Material.Msg Msg)
     | Click
-    | RRuleText String
+    | RRuleText (List String)
 
 
 decodeJobItems : JsonD.Decoder (List JobItem)
@@ -84,10 +85,11 @@ decodeJobItems =
 
 decodeJobItem : JsonD.Decoder JobItem
 decodeJobItem =
-    JsonD.object4 JobItem
+    JsonD.object5 JobItem
         ("id" := JsonD.int)
         ("customer" := JsonD.int)
         ("recurrences" := JsonD.string)
+        (JsonD.succeed [])
         ("description" := JsonD.string)
 
 
@@ -103,6 +105,11 @@ init token =
     (initialModel ! [ loadJobs token ])
 
 
+getRRuleText : List JobItem -> Cmd Msg
+getRRuleText jobItems =
+    Cmd.batch (List.map (\j -> Ports.rruleToText j.recurrences) jobItems)
+
+
 update : Msg -> Model -> String -> ( Model, Cmd Msg )
 update msg model token =
     case msg of
@@ -110,7 +117,7 @@ update msg model token =
             ( { model | loading = True }, loadJobs token )
 
         FetchSucceed jobs ->
-            ( { model | jobItems = jobs, loading = False }, Ports.rruleToText "RRULE:FREQ=WEEKLY;BYDAY=TU RRULE:FREQ=MONTHLY;BYDAY=1MO" )
+            ( { model | jobItems = jobs, loading = False }, getRRuleText jobs )
 
         FetchFail error ->
             ( { model | loading = False }, Cmd.none )
@@ -121,9 +128,14 @@ update msg model token =
         Click ->
             ( model, Cmd.none )
 
-        RRuleText rule ->
-            Debug.log rule
-                ( model, Cmd.none )
+        RRuleText rules ->
+            let
+                updateJobItem jobItem =
+                    { jobItem | recurrencesText = rules }
+            in
+                ( { model | jobItems = List.map updateJobItem model.jobItems }
+                , Cmd.none
+                )
 
 
 subscriptions : Model -> Sub Msg
@@ -152,6 +164,7 @@ list jobs =
                     [ th [] [ text "Id" ]
                     , th [] [ text "Customer" ]
                     , th [] [ text "Recurrence" ]
+                    , th [] [ text "Recurrence" ]
                     , th [] [ text "Description" ]
                     ]
                 ]
@@ -166,6 +179,7 @@ jobRow job =
         [ td [] [ text (toString job.id) ]
         , td [] [ text (toString job.customer) ]
         , td [] [ text job.recurrences ]
+        , td [] [ text (String.concat job.recurrencesText) ]
         , td [] [ text job.description ]
         ]
 
