@@ -71,7 +71,7 @@ initialModel =
 
 type Msg
     = FetchData
-    | FetchSucceed (List JobItem)
+    | FetchSucceed (Result Jwt.JwtError (List JobItem))
     | FetchFail String
     | Mdl (Material.Msg Msg)
     | Click
@@ -95,9 +95,13 @@ decodeJobItem =
 
 loadJobs : String -> Cmd Msg
 loadJobs token =
-    Jwt.get token decodeJobItems "http://localhost:8000/jobs/"
-        |> Task.mapError toString
-        |> Task.perform FetchFail FetchSucceed
+    Jwt.get token "http://localhost:8000/jobs/" decodeJobItems
+        |> Jwt.sendCheckExpired token FetchSucceed
+
+
+
+-- |> Task.mapError toString
+-- |> Task.perform FetchFail FetchSucceed
 
 
 init : String -> ( Model, Cmd Msg )
@@ -116,14 +120,19 @@ update msg model token =
         FetchData ->
             ( { model | loading = True }, loadJobs token )
 
-        FetchSucceed jobs ->
-            ( { model | jobItems = jobs, loading = False }, getRRuleText jobs )
+        FetchSucceed res ->
+            case res of
+                Result.Ok jobs ->
+                    ( { model | jobItems = jobs, loading = False }, getRRuleText jobs )
+
+                Result.Err _ ->
+                    ( model, Cmd.none )
 
         FetchFail error ->
             ( { model | loading = False }, Cmd.none )
 
-        Mdl msg' ->
-            Material.update msg' model
+        Mdl msg_ ->
+            Material.update msg_ model
 
         Click ->
             ( model, Cmd.none )

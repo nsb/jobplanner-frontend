@@ -11,6 +11,7 @@ import Work
 import Login
 import Routing exposing (Route(..))
 import Navigation
+import UrlParser
 
 
 -- MODEL
@@ -47,24 +48,25 @@ initialModel =
     }
 
 
-init : ProgramFlags -> Result String Route -> ( Model, Cmd Msg )
-init flags result =
-    let
-        currentRoute =
-            Routing.routeFromResult result
-
-        updatedModel =
-            { initialModel
-                | route = currentRoute
-                , loginModel = Login.updateModelWithToken flags.apiKey
-            }
-    in
-        case updatedModel.loginModel.token of
-            Just apiKey ->
-                ( updatedModel, Cmd.map WorkMessage (Work.loadJobs apiKey) )
-
-            Nothing ->
-                ( updatedModel, Cmd.none )
+init : ProgramFlags -> Navigation.Location -> ( Model, Cmd Msg )
+init flags location =
+    -- let
+    --     currentRoute =
+    --         UrlParser.parsePath Routing.route location
+    --
+    --     updatedModel =
+    --         { initialModel
+    --             | route = currentRoute
+    --             , loginModel = Login.updateModelWithToken flags.apiKey
+    --         }
+    -- in
+    --     case updatedModel.loginModel.token of
+    --         Just apiKey ->
+    --             ( updatedModel, Cmd.map WorkMessage (Work.loadJobs apiKey) )
+    --
+    --         Nothing ->
+    --             ( updatedModel, Cmd.none )
+    ( initialModel, Cmd.none )
 
 
 
@@ -76,35 +78,43 @@ type Msg
     | ChangeSection Section
     | WorkMessage Work.Msg
     | LoginMessage Login.Msg
+    | NewUrl String
+    | UrlChange Navigation.Location
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Mdl msg' ->
-            Material.update msg' model
+        Mdl msg_ ->
+            Material.update msg_ model
 
-        ChangeSection msg' ->
-            ( { model | currentSection = msg' }, Cmd.none )
+        ChangeSection msg_ ->
+            ( { model | currentSection = msg_ }, Cmd.none )
 
-        WorkMessage msg' ->
+        WorkMessage msg_ ->
             case model.loginModel.token of
                 Just token ->
                     let
                         ( subMdl, subCmd ) =
-                            Work.update msg' model.workModel token
+                            Work.update msg_ model.workModel token
                     in
                         ( { model | workModel = subMdl }, Cmd.map WorkMessage subCmd )
 
                 Nothing ->
                     ( model, Cmd.none )
 
-        LoginMessage msg' ->
+        LoginMessage msg_ ->
             let
                 ( subMdl, subCmd ) =
-                    Login.update msg' model.loginModel
+                    Login.update msg_ model.loginModel
             in
                 ( { model | loginModel = subMdl }, Cmd.map LoginMessage subCmd )
+
+        NewUrl _ ->
+            ( model, Cmd.none )
+
+        UrlChange _ ->
+            ( model, Cmd.none )
 
 
 
@@ -119,13 +129,13 @@ page : Model -> Html Msg
 page model =
     case model.route of
         JobsRoute ->
-            App.map WorkMessage (Work.view model.workModel model.mdl)
+            Html.map WorkMessage (Work.view model.workModel model.mdl)
 
         JobRoute id ->
             text "JobRoute"
 
         Login ->
-            App.map LoginMessage (Login.view model.loginModel)
+            Html.map LoginMessage (Login.view model.loginModel)
 
         NotFoundRoute ->
             text "NotFoundRoute"
@@ -198,13 +208,14 @@ view model =
         |> Scheme.topWithScheme Material.Color.Blue Material.Color.Green
 
 
-urlUpdate : Result String Route -> Model -> ( Model, Cmd Msg )
-urlUpdate result model =
-    let
-        currentRoute =
-            Routing.routeFromResult result
-    in
-        ( { model | route = currentRoute }, Cmd.none )
+
+-- urlUpdate : Result String Route -> Model -> ( Model, Cmd Msg )
+-- urlUpdate result model =
+--     let
+--         currentRoute =
+--             Routing.routeFromResult result
+--     in
+--         ( { model | route = currentRoute }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg
@@ -212,12 +223,14 @@ subscriptions model =
     Sub.batch [ Sub.map WorkMessage (Work.subscriptions model.workModel) ]
 
 
-main : Program ProgramFlags
+
+-- main : Program ProgramFlags
+
+
 main =
-    Navigation.programWithFlags Routing.parser
+    Navigation.programWithFlags UrlChange
         { init = init
         , view = view
         , subscriptions = subscriptions
         , update = update
-        , urlUpdate = urlUpdate
         }
