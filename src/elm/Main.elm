@@ -40,12 +40,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { mdl = Material.model
-    , currentSection = Work
-    , workModel = Work.initialModel
-    , loginModel = Login.initialModel
-    , route = Routing.JobsRoute
-    }
+    Model Material.model Work Work.initialModel Login.initialModel Routing.JobsRoute
 
 
 init : ProgramFlags -> Navigation.Location -> ( Model, Cmd Msg )
@@ -55,10 +50,7 @@ init flags location =
     --         UrlParser.parsePath Routing.route location
     --
     --     updatedModel =
-    --         { initialModel
-    --             | route = currentRoute
-    --             , loginModel = Login.updateModelWithToken flags.apiKey
-    --         }
+    --         { initialModel | route = currentRoute, loginModel = Login.updateModelWithToken flags.apiKey }
     -- in
     --     case updatedModel.loginModel.token of
     --         Just apiKey ->
@@ -223,10 +215,7 @@ subscriptions model =
     Sub.batch [ Sub.map WorkMessage (Work.subscriptions model.workModel) ]
 
 
-
--- main : Program ProgramFlags
-
-
+main : Program ProgramFlags Model Msg
 main =
     Navigation.programWithFlags UrlChange
         { init = init
