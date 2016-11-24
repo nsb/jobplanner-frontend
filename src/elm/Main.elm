@@ -45,20 +45,23 @@ initialModel =
 
 init : ProgramFlags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags location =
-    -- let
-    --     currentRoute =
-    --         UrlParser.parsePath Routing.route location
-    --
-    --     updatedModel =
-    --         { initialModel | route = currentRoute, loginModel = Login.updateModelWithToken flags.apiKey }
-    -- in
-    --     case updatedModel.loginModel.token of
-    --         Just apiKey ->
-    --             ( updatedModel, Cmd.map WorkMessage (Work.loadJobs apiKey) )
-    --
-    --         Nothing ->
-    --             ( updatedModel, Cmd.none )
-    ( initialModel, Cmd.none )
+    let
+        currentRoute =
+            UrlParser.parsePath Routing.route location
+                |> Maybe.withDefault Routing.NotFoundRoute
+
+        updatedModel =
+            { initialModel
+                | route = currentRoute
+                , loginModel = Login.updateModelWithToken flags.apiKey
+            }
+    in
+        case updatedModel.loginModel.token of
+            Just apiKey ->
+                ( updatedModel, Cmd.map WorkMessage (Work.loadJobs apiKey) )
+
+            Nothing ->
+                ( updatedModel, Cmd.none )
 
 
 
