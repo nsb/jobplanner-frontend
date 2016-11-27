@@ -1,8 +1,7 @@
 module Routing exposing (..)
 
-import String
-import Navigation
-import UrlParser exposing ((</>), (<?>), s, int, stringParam, top)
+import Navigation exposing (Location)
+import UrlParser exposing (..)
 import Work exposing (JobItemId)
 
 
@@ -13,13 +12,25 @@ type Route
     | NotFoundRoute
 
 
-route : UrlParser.Parser (Route -> a) a
-route =
-    UrlParser.oneOf
-        [ UrlParser.map JobsRoute (s "")
-        , UrlParser.map JobRoute (s "jobs" </> int)
-        , UrlParser.map Login (s "login")
+matchers : Parser (Route -> a) a
+matchers =
+    oneOf
+        [ map JobsRoute (s "")
+        , map JobRoute (s "jobs" </> int)
+        , map Login (s "login")
         ]
+
+
+parseLocation : Location -> Route
+parseLocation location =
+    case (parseHash matchers location) of
+        Just route ->
+            Debug.log "hejsa"
+                route
+
+        Nothing ->
+            Debug.log "davs"
+                NotFoundRoute
 
 
 

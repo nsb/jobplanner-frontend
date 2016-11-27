@@ -9,9 +9,8 @@ import Material.Scheme as Scheme
 import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Work
 import Login
-import Routing exposing (Route(..))
-import Navigation
-import UrlParser
+import Routing exposing (Route(..), parseLocation)
+import Navigation exposing (Location)
 
 
 -- MODEL
@@ -38,23 +37,22 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    Model Material.model Work Work.initialModel Login.initialModel Routing.JobsRoute
+initialModel : Route -> Model
+initialModel route =
+    Model Material.model Work Work.initialModel Login.initialModel route
 
 
-init : ProgramFlags -> Navigation.Location -> ( Model, Cmd Msg )
+init : ProgramFlags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
         currentRoute =
-            UrlParser.parsePath Routing.route location
-                |> Maybe.withDefault Routing.NotFoundRoute
+            parseLocation location
+
+        modelWithRoute =
+            initialModel currentRoute
 
         updatedModel =
-            { initialModel
-                | route = currentRoute
-                , loginModel = Login.updateModelWithToken flags.apiKey
-            }
+            { modelWithRoute | loginModel = Login.updateModelWithToken flags.apiKey }
     in
         case updatedModel.loginModel.token of
             Just apiKey ->
@@ -73,8 +71,7 @@ type Msg
     | ChangeSection Section
     | WorkMessage Work.Msg
     | LoginMessage Login.Msg
-    | NewUrl String
-    | UrlChange Navigation.Location
+    | OnLocationChange Location
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -105,11 +102,12 @@ update msg model =
             in
                 ( { model | loginModel = subMdl }, Cmd.map LoginMessage subCmd )
 
-        NewUrl _ ->
-            ( model, Cmd.none )
-
-        UrlChange _ ->
-            ( model, Cmd.none )
+        OnLocationChange location ->
+            let
+                newRoute =
+                    parseLocation location
+            in
+                ( { model | route = newRoute }, Cmd.none )
 
 
 
@@ -148,7 +146,7 @@ drawer =
             [ Layout.href "/clients" ]
             [ text "Clients" ]
         , Layout.link
-            [ Layout.href "#work"
+            [ Layout.href "/jobs"
             , Layout.onClick (Layout.toggleDrawer Mdl)
             ]
             [ text "Work" ]
@@ -220,7 +218,7 @@ subscriptions model =
 
 main : Program ProgramFlags Model Msg
 main =
-    Navigation.programWithFlags UrlChange
+    Navigation.programWithFlags OnLocationChange
         { init = init
         , view = view
         , subscriptions = subscriptions
