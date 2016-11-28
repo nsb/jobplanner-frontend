@@ -15,7 +15,7 @@ type Route
 matchers : Parser (Route -> a) a
 matchers =
     oneOf
-        [ map JobsRoute (s "")
+        [ map JobsRoute (s "jobs")
         , map JobRoute (s "jobs" </> int)
         , map Login (s "login")
         ]
@@ -25,12 +25,10 @@ parseLocation : Location -> Route
 parseLocation location =
     case (parseHash matchers location) of
         Just route ->
-            Debug.log "hejsa"
-                route
+            route
 
         Nothing ->
-            Debug.log "davs"
-                NotFoundRoute
+            NotFoundRoute
 
 
 

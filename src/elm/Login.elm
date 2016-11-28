@@ -9,6 +9,7 @@ import Json.Encode as E exposing (Value)
 import Json.Decode as Json exposing (field)
 import Jwt exposing (..)
 import Decoders exposing (..)
+import Ports
 
 
 authUrl : String
@@ -105,7 +106,7 @@ update message model =
         Auth res ->
             case res of
                 Result.Ok token ->
-                    { model | token = Just token, msg = "" } ! []
+                    ( { model | token = Just token, msg = "" }, Ports.storeApiKey token )
 
                 Result.Err err ->
                     { model | msg = getPhoenixError err } ! []
