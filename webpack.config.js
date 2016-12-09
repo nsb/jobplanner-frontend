@@ -79,10 +79,11 @@ if ( TARGET_ENV === 'development' ) {
           loader:  'elm-hot!elm-webpack?verbose=true&warn=true&debug=true'
         },
         {
-          test: /\.(css)$/,
+          test: /\.(css|scss)$/,
           loaders: [
             'style-loader',
             'css-loader',
+            'sass-loader'
           ]
         }
       ]
@@ -107,9 +108,10 @@ if ( TARGET_ENV === 'production' ) {
           loader:  'elm-webpack'
         },
         {
-          test: /\.(css)$/,
+          test: /\.(css|scss)$/,
           loader: ExtractTextPlugin.extract( 'style-loader', [
             'css-loader',
+            'sass-loader'
           ])
         }
       ]

@@ -3,8 +3,10 @@
     "summary": "JobPlanner",
     "repository": "https://github.com/nsb/jobplanner.git",
     "license": "BSD3",
+    "native-modules": true,
     "source-directories": [
-        "./src/elm"
+        "./src/elm",
+        "node_modules/elm-ui/source"
     ],
     "exposed-modules": [],
     "dependencies": {
@@ -12,7 +14,10 @@
         "elm-lang/core": "5.0.0 <= v < 6.0.0",
         "elm-lang/html": "2.0.0 <= v < 3.0.0",
         "elm-lang/http": "1.0.0 <= v < 2.0.0",
+        "elm-lang/svg": "2.0.0 <= v < 3.0.0",
         "elm-lang/navigation": "2.0.1 <= v < 3.0.0",
+        "elm-community/maybe-extra": "3.0.0 <= v < 4.0.0",
+        "rluiten/elm-date-extra": "8.0.0 <= v < 9.0.0",
         "evancz/url-parser": "2.0.1 <= v < 3.0.0",
         "simonh1000/elm-jwt": "4.0.1 <= v < 5.0.0"
     },

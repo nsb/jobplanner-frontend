@@ -13,6 +13,7 @@
   "author": "Niels Sandholt Busch",
   "license": "ISC",
   "dependencies": {
+    "elm-ui": "^0.4.3",
     "dialog-polyfill": "^0.4.4",
     "material-design-lite": "^1.2.1",
     "rrule": "git://github.com/jkbrzt/rrule.git#fd5326d365dc133bc2387a174cdac58283f2c404",
@@ -29,6 +30,7 @@
     "file-loader": "^0.9.0",
     "html-webpack-plugin": "^2.17.0",
     "rimraf": "^2.5.2",
+    "sass-loader": "^4.0.2",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.2",
