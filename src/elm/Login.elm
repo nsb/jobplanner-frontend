@@ -10,6 +10,8 @@ import Json.Decode as Json exposing (field)
 import Jwt exposing (..)
 import Decoders exposing (..)
 import Ports
+import Ui.Container
+import Navigation exposing (newUrl)
 
 
 authUrl : String
@@ -47,13 +49,6 @@ updateModelWithToken token =
 init : ( Model, Cmd Msg )
 init =
     ( initialModel, Cmd.none )
-
-
-
--- init : ( Model, Cmd Msg )
--- init =
---     Model "testuser" "testpassword" Nothing "" ! []
--- UPDATE
 
 
 type
@@ -106,7 +101,9 @@ update message model =
         Auth res ->
             case res of
                 Result.Ok token ->
-                    ( { model | token = Just token, msg = "" }, Ports.storeApiKey token )
+                    ( { model | token = Just token, msg = "" }
+                    , Cmd.batch [ Ports.storeApiKey token, newUrl "#jobs" ]
+                    )
 
                 Result.Err err ->
                     { model | msg = getPhoenixError err } ! []
@@ -199,48 +196,41 @@ errorDecoder =
 
 view : Model -> Html Msg
 view model =
-    div
-        [ class "container" ]
-        [ h1 [] [ text "elm-jwt with Phoenix backend" ]
-        , p [] [ text "username = testuser, password = testpassword" ]
-        , div
-            [ class "row" ]
-            [ Html.form
-                [ onSubmit Login
-                , class "col-xs-12"
-                ]
-                [ div []
-                    [ div
-                        [ class "form-group" ]
-                        [ label
-                            [ for "uname" ]
-                            [ text "Username" ]
-                        , input
-                            -- [ on "input" (Json.map (Input Uname) targetValue) (Signal.message address)
-                            [ onInput (FormInput Uname)
-                            , class "form-control"
-                            , value model.uname
-                            ]
-                            []
+    Ui.Container.view
+        { direction = "column", align = "center", compact = False }
+        []
+        [ Html.form
+            [ onSubmit Login ]
+            [ div []
+                [ div
+                    [ class "form-group" ]
+                    [ label
+                        [ for "uname" ]
+                        [ text "Username" ]
+                    , input
+                        -- [ on "input" (Json.map (Input Uname) targetValue) (Signal.message address)
+                        [ onInput (FormInput Uname)
+                        , value model.uname
                         ]
-                    , div
-                        [ class "form-group" ]
-                        [ label
-                            [ for "pword" ]
-                            [ text "Password" ]
-                        , input
-                            [ onInput (FormInput Pword)
-                            , class "form-control"
-                            , value model.pword
-                            ]
-                            []
-                        ]
-                    , button
-                        [ type_ "submit"
-                        , class "btn btn-default"
-                        ]
-                        [ text "Login" ]
+                        []
                     ]
+                , div
+                    []
+                    [ label
+                        [ for "pword" ]
+                        [ text "Password" ]
+                    , input
+                        [ onInput (FormInput Pword)
+                        , class "form-control"
+                        , value model.pword
+                        ]
+                        []
+                    ]
+                , button
+                    [ type_ "submit"
+                    , class "btn btn-default"
+                    ]
+                    [ text "Login" ]
                 ]
             ]
         , case model.token of

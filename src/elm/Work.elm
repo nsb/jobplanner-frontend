@@ -1,17 +1,14 @@
 module Work exposing (..)
 
 import Json.Decode as JsonD exposing (field)
-import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Jwt
-import Material
-import Material.Button as Button exposing (..)
-import Material.Icon as Icon
-import Material.Spinner as Loading
 import Ports
 import Date exposing (Date)
 import String
+import Ui.Button
+import Ui.Loader
 
 
 type alias JobItemId =
@@ -57,14 +54,12 @@ type alias JobItem =
 type alias Model =
     { jobItems : List JobItem
     , loading : Bool
-    , mdl : Material.Model
     }
 
 
 initialModel : Model
 initialModel =
     { jobItems = []
-    , mdl = Material.model
     , loading = False
     }
 
@@ -73,7 +68,6 @@ type Msg
     = FetchData
     | FetchSucceed (Result Jwt.JwtError (List JobItem))
     | FetchFail String
-    | Mdl (Material.Msg Msg)
     | Click
     | RRuleText (List String)
 
@@ -99,11 +93,6 @@ loadJobs token =
         |> Jwt.sendCheckExpired token FetchSucceed
 
 
-
--- |> Task.mapError toString
--- |> Task.perform FetchFail FetchSucceed
-
-
 init : String -> ( Model, Cmd Msg )
 init token =
     (initialModel ! [ loadJobs token ])
@@ -123,16 +112,15 @@ update msg model token =
         FetchSucceed res ->
             case res of
                 Result.Ok jobs ->
-                    ( { model | jobItems = jobs, loading = False }, getRRuleText jobs )
+                    ( { model | jobItems = jobs, loading = False }
+                    , getRRuleText jobs
+                    )
 
                 Result.Err _ ->
                     ( model, Cmd.none )
 
         FetchFail error ->
             ( { model | loading = False }, Cmd.none )
-
-        Mdl msg_ ->
-            Material.update msg_ model
 
         Click ->
             ( model, Cmd.none )
@@ -152,16 +140,9 @@ subscriptions _ =
     Sub.batch [ Ports.rruleText RRuleText ]
 
 
-type alias Mdl =
-    Material.Model
-
-
 loading : Html msg
 loading =
-    div [ class "loading" ]
-        [ Loading.spinner
-            [ Loading.active True ]
-        ]
+    Ui.Loader.barView { timeout = 1000, loading = True, shown = True }
 
 
 list : List JobItem -> Html Msg
@@ -193,8 +174,8 @@ jobRow job =
         ]
 
 
-view : Model -> Material.Model -> Html Msg
-view model mdl =
+view : Model -> Html Msg
+view model =
     div []
         [ h4 [] [ text "Jobs" ]
         , p []
@@ -205,13 +186,5 @@ view model mdl =
                 False ->
                     list model.jobItems
             ]
-        , Button.render Mdl
-            [ 0 ]
-            mdl
-            [ Button.fab
-            , Button.colored
-            , Button.ripple
-            , Button.onClick Click
-            ]
-            [ Icon.i "add" ]
+        , Ui.Button.primary "Add" Click
         ]

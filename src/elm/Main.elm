@@ -1,16 +1,9 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (href, class, style, colspan)
 import Ui.App
 import Ui.Layout
 import Ui.Header
-import Ui.Container
-import Material
-import Material.Layout as Layout
-import Material.Color exposing (Hue(..))
-import Material.Scheme as Scheme
-import Material.Grid exposing (grid, cell, size, offset, Device(..))
 import Work
 import Login
 import Routing exposing (Route(..), parseLocation)
@@ -32,9 +25,7 @@ type Section
 
 
 type alias Model =
-    { mdl :
-        Material.Model
-    , app : Ui.App.Model
+    { app : Ui.App.Model
     , currentSection : Section
     , workModel : Work.Model
     , loginModel : Login.Model
@@ -44,7 +35,7 @@ type alias Model =
 
 initialModel : Route -> Model
 initialModel route =
-    Model Material.model Ui.App.init Work Work.initialModel Login.initialModel route
+    Model Ui.App.init Work Work.initialModel Login.initialModel route
 
 
 init : ProgramFlags -> Location -> ( Model, Cmd Msg )
@@ -72,8 +63,7 @@ init flags location =
 
 
 type Msg
-    = Mdl (Material.Msg Msg)
-    | App Ui.App.Msg
+    = App Ui.App.Msg
     | ChangeSection Section
     | WorkMessage Work.Msg
     | LoginMessage Login.Msg
@@ -83,9 +73,6 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Mdl msg_ ->
-            Material.update msg_ model
-
         ChangeSection msg_ ->
             ( { model | currentSection = msg_ }, Cmd.none )
 
@@ -127,15 +114,11 @@ update msg model =
 -- VIEW
 
 
-type alias Mdl =
-    Material.Model
-
-
 content : Model -> Html Msg
 content model =
     case model.route of
         JobsRoute ->
-            Html.map WorkMessage (Work.view model.workModel model.mdl)
+            Html.map WorkMessage (Work.view model.workModel)
 
         JobRoute id ->
             text "JobRoute"
@@ -145,16 +128,6 @@ content model =
 
         NotFoundRoute ->
             text "NotFoundRoute"
-
-
-componentHeader : String -> Html.Html Msg
-componentHeader title =
-    componentHeaderRender title
-
-
-componentHeaderRender : String -> Html.Html Msg
-componentHeaderRender title =
-    tr [] [ td [ colspan 3 ] [ text title ] ]
 
 
 sidebar : Html Msg
@@ -186,8 +159,8 @@ header =
         ]
 
 
-view : Model -> Html Msg
-view model =
+authenticated : Model -> Html Msg
+authenticated model =
     Ui.App.view App
         model.app
         [ Ui.Layout.app
@@ -195,6 +168,27 @@ view model =
             [ header ]
             [ content model ]
         ]
+
+
+unauthenticated : Model -> Html Msg
+unauthenticated model =
+    Ui.App.view App
+        model.app
+        [ Ui.Layout.website
+            [ header ]
+            [ content model ]
+            [ text "footer" ]
+        ]
+
+
+view : Model -> Html Msg
+view model =
+    case model.route of
+        Login ->
+            unauthenticated model
+
+        _ ->
+            authenticated model
 
 
 subscriptions : Model -> Sub Msg
