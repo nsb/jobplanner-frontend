@@ -1,11 +1,11 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (href, class, style)
-import Ui.Container
-import Ui.Button
+import Html.Attributes exposing (href, class, style, colspan)
 import Ui.App
-import Ui
+import Ui.Layout
+import Ui.Header
+import Ui.Container
 import Material
 import Material.Layout as Layout
 import Material.Color exposing (Hue(..))
@@ -34,6 +34,7 @@ type Section
 type alias Model =
     { mdl :
         Material.Model
+    , app : Ui.App.Model
     , currentSection : Section
     , workModel : Work.Model
     , loginModel : Login.Model
@@ -43,7 +44,7 @@ type alias Model =
 
 initialModel : Route -> Model
 initialModel route =
-    Model Material.model Work Work.initialModel Login.initialModel route
+    Model Material.model Ui.App.init Work Work.initialModel Login.initialModel route
 
 
 init : ProgramFlags -> Location -> ( Model, Cmd Msg )
@@ -72,6 +73,7 @@ init flags location =
 
 type Msg
     = Mdl (Material.Msg Msg)
+    | App Ui.App.Msg
     | ChangeSection Section
     | WorkMessage Work.Msg
     | LoginMessage Login.Msg
@@ -113,6 +115,13 @@ update msg model =
             in
                 ( { model | route = newRoute }, Cmd.none )
 
+        App act ->
+            let
+                ( app, effect ) =
+                    Ui.App.update act model.app
+            in
+                ( { model | app = app }, Cmd.map App effect )
+
 
 
 -- VIEW
@@ -122,8 +131,8 @@ type alias Mdl =
     Material.Model
 
 
-page : Model -> Html Msg
-page model =
+content : Model -> Html Msg
+content model =
     case model.route of
         JobsRoute ->
             Html.map WorkMessage (Work.view model.workModel model.mdl)
@@ -138,74 +147,75 @@ page model =
             text "NotFoundRoute"
 
 
-drawer : List (Html Msg)
-drawer =
-    [ Layout.title [] [ text "JobPlanner" ]
-    , Layout.navigation
-        []
-        [ Layout.link
-            [ Layout.href "/calendar" ]
-            [ text "Calendar" ]
-        , Layout.link
-            [ Layout.href "/clients" ]
-            [ text "Clients" ]
-        , Layout.link
-            [ Layout.href "/jobs"
-            , Layout.onClick (Layout.toggleDrawer Mdl)
+componentHeader : String -> Html.Html Msg
+componentHeader title =
+    componentHeaderRender title
+
+
+componentHeaderRender : String -> Html.Html Msg
+componentHeaderRender title =
+    tr [] [ td [ colspan 3 ] [ text title ] ]
+
+
+sidebar : Html Msg
+sidebar =
+    div []
+        [ Ui.Header.view
+            [ Ui.Header.title
+                { action = Nothing
+                , target = "_self"
+                , link = Nothing
+                , text = ""
+                }
             ]
-            [ text "Work" ]
+        , div [] [ text "sidebar 1" ]
+        , div [] [ text "sidebar 2" ]
+        , div [] [ text "sidebar 3" ]
         ]
-    ]
 
 
 header : Html Msg
 header =
-    Layout.row []
-        [ Layout.title [] [ text "JobPlanner" ]
-        , Layout.spacer
-        , Layout.navigation []
-            [ Layout.link [ Layout.href "https://www.jobplanner.dk" ]
-                [ text "JobPlanner" ]
-            ]
-        ]
-
-
-content : Model -> Html Msg
-content model =
-    grid []
-        [ cell [ size Tablet 8, size Desktop 12, size Phone 4 ]
-            [ div []
-                -- [ App.map WorkMessage (Work.view model.workModel)
-                -- ]
-                [ page model ]
-              -- [ App.map LoginMessage (Login.view model.loginModel) ]
-            ]
+    Ui.Header.view
+        [ Ui.Header.title
+            { action = Nothing
+            , target = "_self"
+            , link = Nothing
+            , text = "JobPlanner"
+            }
         ]
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ Html.text ""
-        , Html.header [ Html.Attributes.title "JobPlanner" ] []
-        , Layout.render Mdl
-            model.mdl
-            [ Layout.fixedHeader
-            , Layout.fixedTabs
-            , Layout.waterfall True
-            ]
-            { header = [ header ]
-            , drawer = drawer
-            , tabs = ( [], [] )
-            , main =
-                [ content model
-                ]
-            }
+    Ui.App.view App
+        model.app
+        [ Ui.Layout.app
+            [ sidebar ]
+            [ header ]
+            [ content model ]
         ]
-        |> Scheme.topWithScheme Material.Color.Blue Material.Color.Green
 
 
 
+-- div []
+--     [ Html.text ""
+--     , Html.header [ Html.Attributes.title "JobPlanner" ] []
+--     , Layout.render Mdl
+--         model.mdl
+--         [ Layout.fixedHeader
+--         , Layout.fixedTabs
+--         , Layout.waterfall True
+--         ]
+--         { header = [ header ]
+--         , drawer = drawer
+--         , tabs = ( [], [] )
+--         , main =
+--             [ content model
+--             ]
+--         }
+--     ]
+--     |> Scheme.topWithScheme Material.Color.Blue Material.Color.Green
 -- urlUpdate : Result String Route -> Model -> ( Model, Cmd Msg )
 -- urlUpdate result model =
 --     let
