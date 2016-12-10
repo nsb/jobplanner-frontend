@@ -198,72 +198,74 @@ view : Model -> Html Msg
 view model =
     Ui.Container.view
         { direction = "column", align = "center", compact = False }
-        []
-        [ Html.form
-            [ onSubmit Login ]
-            [ div []
-                [ div
-                    [ class "form-group" ]
-                    [ label
-                        [ for "uname" ]
-                        [ text "Username" ]
-                    , input
-                        -- [ on "input" (Json.map (Input Uname) targetValue) (Signal.message address)
-                        [ onInput (FormInput Uname)
-                        , value model.uname
+        [ style [ ( "align-items", "center" ) ] ]
+        [ div []
+            [ Html.form
+                [ onSubmit Login ]
+                [ div []
+                    [ div
+                        [ class "form-group" ]
+                        [ label
+                            [ for "uname" ]
+                            [ text "Username" ]
+                        , input
+                            -- [ on "input" (Json.map (Input Uname) targetValue) (Signal.message address)
+                            [ onInput (FormInput Uname)
+                            , value model.uname
+                            ]
+                            []
                         ]
+                    , div
                         []
-                    ]
-                , div
-                    []
-                    [ label
-                        [ for "pword" ]
-                        [ text "Password" ]
-                    , input
-                        [ onInput (FormInput Pword)
-                        , class "form-control"
-                        , value model.pword
+                        [ label
+                            [ for "pword" ]
+                            [ text "Password" ]
+                        , input
+                            [ onInput (FormInput Pword)
+                            , class "form-control"
+                            , value model.pword
+                            ]
+                            []
                         ]
-                        []
+                    , button
+                        [ type_ "submit"
+                        , class "btn btn-default"
+                        ]
+                        [ text "Login" ]
                     ]
-                , button
-                    [ type_ "submit"
-                    , class "btn btn-default"
-                    ]
-                    [ text "Login" ]
                 ]
-            ]
-        , case model.token of
-            Nothing ->
-                text ""
+            , case model.token of
+                Nothing ->
+                    text ""
 
-            Just tokenString ->
-                let
-                    token =
-                        decodeToken tokenDecoder tokenString
-                in
-                    div []
-                        [ p [] [ text <| toString token ]
-                        , button
-                            [ class "btn btn-primary"
-                            , onClick TryToken
+                Just tokenString ->
+                    let
+                        token =
+                            decodeToken tokenDecoder tokenString
+                    in
+                        div []
+                            [ p [] [ text <| toString token ]
+                            , button
+                                [ class "btn btn-primary"
+                                , onClick TryToken
+                                ]
+                                [ text "Try token" ]
+                            , button
+                                [ class "btn btn-warning"
+                                , onClick TryInvalidToken
+                                ]
+                                [ text "Try invalid token" ]
+                            , button
+                                [ class "btn btn-warning"
+                                , onClick TryErrorRoute
+                                ]
+                                [ text "Try api route with error" ]
+                            , p [] [ text "Wait 30 seconds and try again too" ]
                             ]
-                            [ text "Try token" ]
-                        , button
-                            [ class "btn btn-warning"
-                            , onClick TryInvalidToken
-                            ]
-                            [ text "Try invalid token" ]
-                        , button
-                            [ class "btn btn-warning"
-                            , onClick TryErrorRoute
-                            ]
-                            [ text "Try api route with error" ]
-                        , p [] [ text "Wait 30 seconds and try again too" ]
-                        ]
-        , p
-            [ style [ ( "color", "red" ) ] ]
-            [ text model.msg ]
+            , p
+                [ style [ ( "color", "red" ) ] ]
+                [ text model.msg ]
+            ]
         ]
 
 

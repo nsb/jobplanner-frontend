@@ -9,6 +9,7 @@ type Route
     = JobsRoute
     | JobRoute JobItemId
     | Login
+    | Signup
     | NotFoundRoute
 
 
@@ -18,6 +19,7 @@ matchers =
         [ map JobsRoute (s "jobs")
         , map JobRoute (s "jobs" </> int)
         , map Login (s "login")
+        , map Signup (s "signup")
         ]
 
 
@@ -29,24 +31,3 @@ parseLocation location =
 
         Nothing ->
             NotFoundRoute
-
-
-
--- hashParser : Navigation.Location -> Result String Route
--- hashParser location =
---     location.hash
---         |> String.dropLeft 1
---         |> parse identity matchers
---
---
--- parser : Navigation.Parser (Result String Route)
--- parser =
---     Navigation.makeParser hashParser
--- routeFromResult : Result String Route -> Route
--- routeFromResult result =
---     case result of
---         Ok route ->
---             route
---
---         Err string ->
---             NotFoundRoute

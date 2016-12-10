@@ -6,8 +6,9 @@ import Ui.Layout
 import Ui.Header
 import Work
 import Login
+import Signup
 import Routing exposing (Route(..), parseLocation)
-import Navigation exposing (Location)
+import Navigation exposing (Location, newUrl)
 
 
 -- MODEL
@@ -29,13 +30,20 @@ type alias Model =
     , currentSection : Section
     , workModel : Work.Model
     , loginModel : Login.Model
+    , signupModel : Signup.Model
     , route : Routing.Route
     }
 
 
 initialModel : Route -> Model
 initialModel route =
-    Model Ui.App.init Work Work.initialModel Login.initialModel route
+    Model
+        Ui.App.init
+        Work
+        Work.initialModel
+        Login.initialModel
+        Signup.initialModel
+        route
 
 
 init : ProgramFlags -> Location -> ( Model, Cmd Msg )
@@ -48,14 +56,14 @@ init flags location =
             initialModel currentRoute
 
         updatedModel =
-            { modelWithRoute | loginModel = Login.updateModelWithToken flags.apiKey }
+            { modelWithRoute
+                | loginModel =
+                    Login.updateModelWithToken flags.apiKey
+            }
     in
-        case updatedModel.loginModel.token of
-            Just apiKey ->
-                ( updatedModel, Cmd.map WorkMessage (Work.loadJobs apiKey) )
-
-            Nothing ->
-                ( updatedModel, Cmd.none )
+        ( updatedModel
+        , cmdForRoute updatedModel.route updatedModel.loginModel.token
+        )
 
 
 
@@ -67,6 +75,7 @@ type Msg
     | ChangeSection Section
     | WorkMessage Work.Msg
     | LoginMessage Login.Msg
+    | SignupMessage Signup.Msg
     | OnLocationChange Location
 
 
@@ -95,12 +104,19 @@ update msg model =
             in
                 ( { model | loginModel = subMdl }, Cmd.map LoginMessage subCmd )
 
+        SignupMessage msg_ ->
+            let
+                ( subMdl, subCmd ) =
+                    Signup.update msg_ model.signupModel
+            in
+                ( { model | signupModel = subMdl }, Cmd.map SignupMessage subCmd )
+
         OnLocationChange location ->
             let
                 newRoute =
                     parseLocation location
             in
-                ( { model | route = newRoute }, Cmd.none )
+                ( { model | route = newRoute }, cmdForRoute newRoute model.loginModel.token )
 
         App act ->
             let
@@ -108,6 +124,21 @@ update msg model =
                     Ui.App.update act model.app
             in
                 ( { model | app = app }, Cmd.map App effect )
+
+
+cmdForRoute : Route -> Maybe String -> Cmd Msg
+cmdForRoute route apiKey =
+    case apiKey of
+        Just apiKey_ ->
+            case route of
+                JobsRoute ->
+                    Cmd.map WorkMessage (Work.loadJobs apiKey_)
+
+                _ ->
+                    Cmd.none
+
+        Nothing ->
+            newUrl "#login"
 
 
 
@@ -125,6 +156,9 @@ content model =
 
         Login ->
             Html.map LoginMessage (Login.view model.loginModel)
+
+        Signup ->
+            Html.map SignupMessage (Signup.view model.signupModel)
 
         NotFoundRoute ->
             text "NotFoundRoute"
@@ -185,6 +219,9 @@ view : Model -> Html Msg
 view model =
     case model.route of
         Login ->
+            unauthenticated model
+
+        Signup ->
             unauthenticated model
 
         _ ->
