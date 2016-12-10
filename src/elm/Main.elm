@@ -19,15 +19,8 @@ type alias ProgramFlags =
     }
 
 
-type Section
-    = Calendar
-    | Clients
-    | Work
-
-
 type alias Model =
     { app : Ui.App.Model
-    , currentSection : Section
     , workModel : Work.Model
     , loginModel : Login.Model
     , signupModel : Signup.Model
@@ -39,7 +32,6 @@ initialModel : Route -> Model
 initialModel route =
     Model
         Ui.App.init
-        Work
         Work.initialModel
         Login.initialModel
         Signup.initialModel
@@ -72,7 +64,6 @@ init flags location =
 
 type Msg
     = App Ui.App.Msg
-    | ChangeSection Section
     | WorkMessage Work.Msg
     | LoginMessage Login.Msg
     | SignupMessage Signup.Msg
@@ -82,9 +73,6 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ChangeSection msg_ ->
-            ( { model | currentSection = msg_ }, Cmd.none )
-
         WorkMessage msg_ ->
             case model.loginModel.token of
                 Just token ->
@@ -116,7 +104,9 @@ update msg model =
                 newRoute =
                     parseLocation location
             in
-                ( { model | route = newRoute }, cmdForRoute newRoute model.loginModel.token )
+                ( { model | route = newRoute }
+                , cmdForRoute newRoute model.loginModel.token
+                )
 
         App act ->
             let
