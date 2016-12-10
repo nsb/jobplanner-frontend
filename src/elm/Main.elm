@@ -197,34 +197,6 @@ view model =
         ]
 
 
-
--- div []
---     [ Html.text ""
---     , Html.header [ Html.Attributes.title "JobPlanner" ] []
---     , Layout.render Mdl
---         model.mdl
---         [ Layout.fixedHeader
---         , Layout.fixedTabs
---         , Layout.waterfall True
---         ]
---         { header = [ header ]
---         , drawer = drawer
---         , tabs = ( [], [] )
---         , main =
---             [ content model
---             ]
---         }
---     ]
---     |> Scheme.topWithScheme Material.Color.Blue Material.Color.Green
--- urlUpdate : Result String Route -> Model -> ( Model, Cmd Msg )
--- urlUpdate result model =
---     let
---         currentRoute =
---             Routing.routeFromResult result
---     in
---         ( { model | route = currentRoute }, Cmd.none )
-
-
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch [ Sub.map WorkMessage (Work.subscriptions model.workModel) ]
