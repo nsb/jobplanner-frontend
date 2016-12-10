@@ -44,7 +44,7 @@ type alias Reccurence =
 
 type alias JobItem =
     { id : JobItemId
-    , customer : Int
+    , client : String
     , recurrences : String
     , recurrencesText : List String
     , description : String
@@ -81,7 +81,7 @@ decodeJobItem : JsonD.Decoder JobItem
 decodeJobItem =
     JsonD.map5 JobItem
         (field "id" JsonD.int)
-        (field "customer" JsonD.int)
+        (field "client" JsonD.string)
         (field "recurrences" JsonD.string)
         (JsonD.succeed [])
         (field "description" JsonD.string)
@@ -167,7 +167,7 @@ jobRow : JobItem -> Html Msg
 jobRow job =
     tr []
         [ td [] [ text (toString job.id) ]
-        , td [] [ text (toString job.customer) ]
+        , td [] [ text job.client ]
         , td [] [ text job.recurrences ]
         , td [] [ text (String.concat job.recurrencesText) ]
         , td [] [ text job.description ]
